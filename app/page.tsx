@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type SyntheticEvent } from 'react';
 import {
   ArrowLeft,
   Bell,
@@ -469,12 +469,36 @@ function TemplatesView() {
 
 function ActionModal({ mode, onClose }: { mode: ModalMode; onClose: () => void }) {
   const [submitted, setSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const titles = { upload: 'Cargar documento', notification: 'Nueva notificación', evidence: 'Registrar diligencia' };
   const descriptions = {
     upload: 'Agrega un acuerdo, sentencia o plantilla en Word o PDF.',
     notification: 'Captura los datos mínimos para incorporar un destino a tu jornada.',
     evidence: 'Registra el resultado y conserva evidencia para preparar la razón actuarial.',
   };
+
+  async function handleSubmit(event: SyntheticEvent<HTMLFormElement, SubmitEvent>) {
+    event.preventDefault();
+    setErrorMessage('');
+
+    if (mode !== 'upload') {
+      setSubmitted(true);
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const response = await fetch('/api/documents', { method: 'POST', body: new FormData(event.currentTarget) });
+      const payload = await response.json().catch(() => ({})) as { error?: string };
+      if (!response.ok) throw new Error(payload.error ?? 'No fue posible guardar el documento.');
+      setSubmitted(true);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'No fue posible guardar el documento.');
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div role="presentation" className="fixed inset-0 z-50 grid place-items-end bg-slate-950/45 p-0 backdrop-blur-[2px] sm:place-items-center sm:p-5" onMouseDown={(event) => { if (event.currentTarget === event.target) onClose(); }}>
@@ -487,11 +511,12 @@ function ActionModal({ mode, onClose }: { mode: ModalMode; onClose: () => void }
         {submitted ? (
           <div className="py-10 text-center"><span className="mx-auto grid size-14 place-items-center rounded-full bg-emerald-100 text-emerald-700"><Check aria-hidden="true" className="size-7" /></span><h3 className="mt-4 text-lg font-bold">Registro guardado</h3><p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted-foreground">Quedó en borrador para que puedas cotejarlo antes de incorporarlo a una actuación oficial.</p><Button onClick={onClose} className="mt-6 cursor-pointer">Volver al espacio de trabajo</Button></div>
         ) : (
-          <form onSubmit={(event) => { event.preventDefault(); setSubmitted(true); }} className="mt-6 space-y-4">
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             {mode === 'upload' ? <UploadFields /> : null}
             {mode === 'notification' ? <NotificationFields /> : null}
             {mode === 'evidence' ? <EvidenceFields /> : null}
-            <div className="flex flex-col-reverse gap-2 border-t border-border pt-5 sm:flex-row sm:justify-end"><Button type="button" onClick={onClose} variant="outline" className="h-11 cursor-pointer">Cancelar</Button><Button type="submit" className="h-11 cursor-pointer bg-accent-foreground px-5 text-white hover:bg-accent-foreground/90">Guardar borrador</Button></div>
+            {errorMessage ? <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-800">{errorMessage}</p> : null}
+            <div className="flex flex-col-reverse gap-2 border-t border-border pt-5 sm:flex-row sm:justify-end"><Button type="button" onClick={onClose} variant="outline" className="h-11 cursor-pointer">Cancelar</Button><Button disabled={saving} type="submit" className="h-11 cursor-pointer bg-accent-foreground px-5 text-white hover:bg-accent-foreground/90">{saving ? 'Guardando…' : 'Guardar borrador'}</Button></div>
           </form>
         )}
       </dialog>
@@ -500,7 +525,7 @@ function ActionModal({ mode, onClose }: { mode: ModalMode; onClose: () => void }
 }
 
 function UploadFields() {
-  return <><label className="grid min-h-36 cursor-pointer place-items-center rounded-xl border-2 border-dashed border-border bg-muted/30 p-5 text-center hover:border-primary/40 hover:bg-secondary"><input required type="file" accept=".doc,.docx,.pdf,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="sr-only" /><span><Upload aria-hidden="true" className="mx-auto size-7 text-primary" /><span className="mt-3 block text-sm font-bold">Selecciona Word o PDF</span><span className="mt-1 block text-xs text-muted-foreground">Máximo sugerido: 25 MB</span></span></label><Field label="Tipo de documento"><select required className="form-control"><option value="">Seleccionar…</option><option>Acuerdo</option><option>Sentencia</option><option>Plantilla propia</option></select></Field><div className="rounded-lg bg-blue-50 p-3 text-xs leading-5 text-blue-950"><strong>Privacidad:</strong> el archivo se asociará únicamente a tu cuenta. La extracción automática será una propuesta y nunca sustituye tu cotejo.</div></>;
+  return <><label className="grid min-h-36 cursor-pointer place-items-center rounded-xl border-2 border-dashed border-border bg-muted/30 p-5 text-center hover:border-primary/40 hover:bg-secondary"><input name="file" required type="file" accept=".doc,.docx,.pdf,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="sr-only" /><span><Upload aria-hidden="true" className="mx-auto size-7 text-primary" /><span className="mt-3 block text-sm font-bold">Selecciona Word o PDF</span><span className="mt-1 block text-xs text-muted-foreground">Máximo permitido: 25 MB</span></span></label><Field label="Tipo de documento"><select name="category" required className="form-control"><option value="">Seleccionar…</option><option value="agreement">Acuerdo</option><option value="judgment">Sentencia</option><option value="template">Plantilla propia</option></select></Field><div className="rounded-lg bg-blue-50 p-3 text-xs leading-5 text-blue-950"><strong>Privacidad:</strong> el archivo se asociará únicamente a tu cuenta. La extracción automática será una propuesta y nunca sustituye tu cotejo.</div></>;
 }
 
 function NotificationFields() {
