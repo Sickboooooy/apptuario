@@ -30,15 +30,6 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 
 const notifications = [
   {
@@ -48,7 +39,7 @@ const notifications = [
     address: 'Av. Paseo de la Reforma 250, Cuauhtémoc',
     case: 'Amparo indirecto 428/2026',
     status: 'Por iniciar',
-    tone: 'blue',
+    tone: 'blue' as const,
   },
   {
     time: '11:15',
@@ -57,7 +48,7 @@ const notifications = [
     address: 'Bucareli 99, Centro, Cuauhtémoc',
     case: 'Amparo indirecto 511/2026',
     status: 'Pendiente',
-    tone: 'amber',
+    tone: 'amber' as const,
   },
   {
     time: '13:00',
@@ -66,7 +57,7 @@ const notifications = [
     address: 'Eduardo Molina 2, El Parque, Venustiano Carranza',
     case: 'Amparo en revisión 92/2026',
     status: 'Pendiente',
-    tone: 'slate',
+    tone: 'slate' as const,
   },
 ];
 
@@ -84,15 +75,21 @@ export default function Home() {
   const [routeStarted, setRouteStarted] = useState(false);
 
   return (
-    <div className="min-h-dvh bg-background text-foreground">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] border-r border-sidebar-border bg-sidebar lg:flex lg:flex-col">
-        <div className="flex h-20 items-center gap-3 border-b border-sidebar-border px-6">
-          <div className="grid size-11 place-items-center overflow-hidden rounded-xl bg-white p-0.5 shadow-sm ring-1 ring-sidebar-border">
-            <Image src="/apptuario-mark.png" alt="" width={44} height={44} className="size-full object-contain" priority />
+    <div className="ambient-glow-wrapper text-foreground">
+      {/* Ambient background light orbs for rich glassmorphic refraction */}
+      <div className="ambient-orb-1" aria-hidden="true" />
+      <div className="ambient-orb-2" aria-hidden="true" />
+      <div className="ambient-orb-3" aria-hidden="true" />
+
+      {/* Glassmorphic Sidebar */}
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[256px] border-r border-white/60 bg-white/70 backdrop-blur-2xl shadow-[4px_0_24px_rgba(30,58,138,0.03)] dark:border-white/10 dark:bg-slate-900/70 lg:flex lg:flex-col">
+        <div className="flex h-20 items-center gap-3.5 border-b border-white/50 px-6 dark:border-white/10">
+          <div className="grid size-11 place-items-center overflow-hidden rounded-2xl bg-white/90 p-1 shadow-sm ring-1 ring-white/80 backdrop-blur-md">
+            <Image src="/apptuario-mark.png" alt="AppTuario" width={44} height={44} className="size-full object-contain" priority />
           </div>
           <div>
-            <p className="font-heading text-[22px] font-semibold leading-none tracking-tight">AppTuario</p>
-            <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Gestión actuarial</p>
+            <p className="font-heading text-[23px] font-bold leading-none tracking-tight text-primary">AppTuario</p>
+            <p className="mt-1 text-[10.5px] font-extrabold uppercase tracking-[0.18em] text-muted-foreground">Gestión actuarial</p>
           </div>
         </div>
 
@@ -103,21 +100,23 @@ export default function Home() {
               key={label}
               onClick={() => setActiveView(label)}
               aria-current={activeView === label ? 'page' : undefined}
-              className={`flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg px-3.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+              className={`group flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-xl px-3.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 activeView === label
-                  ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm'
-                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                  ? 'glass-sidebar-active text-white'
+                  : 'text-foreground/70 hover:border-white/60 hover:bg-white/75 hover:text-foreground hover:shadow-xs border border-transparent'
               }`}
             >
-              <Icon aria-hidden="true" className="size-[18px]" />
-              {label}
+              <Icon aria-hidden="true" className={`size-[18px] transition-transform duration-200 group-hover:scale-110 ${activeView === label ? 'text-white' : 'text-primary/70'}`} />
+              <span>{label}</span>
             </button>
           ))}
         </nav>
 
-        <div className="m-4 rounded-xl border border-sidebar-border bg-white p-4 shadow-xs">
-          <div className="flex items-center gap-2 text-sm font-bold text-primary">
-            <Sparkles aria-hidden="true" className="size-4 text-accent-foreground" />
+        <div className="m-4 glass-panel rounded-2xl p-4 shadow-sm border border-white/80">
+          <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-primary">
+            <span className="grid size-6 place-items-center rounded-lg bg-amber-500/15 text-amber-700">
+              <Sparkles aria-hidden="true" className="size-3.5" />
+            </span>
             Consejo del día
           </div>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">
@@ -125,153 +124,210 @@ export default function Home() {
           </p>
         </div>
 
-        <button type="button" className="m-4 mt-0 flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3.5 text-sm font-semibold text-sidebar-foreground/70 hover:bg-sidebar-accent">
-          <Settings aria-hidden="true" className="size-[18px]" />
-          Configuración
+        <button
+          type="button"
+          className="m-4 mt-0 flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-transparent px-3.5 text-sm font-semibold text-foreground/70 transition-all hover:border-white/60 hover:bg-white/70 hover:text-foreground"
+        >
+          <Settings aria-hidden="true" className="size-[18px] text-muted-foreground" />
+          <span>Configuración</span>
         </button>
       </aside>
 
-      <div className="lg:pl-[248px]">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-background/95 px-4 backdrop-blur sm:px-6 lg:h-20 lg:px-8">
+      {/* Main Content Area */}
+      <div className="relative z-10 lg:pl-[256px]">
+        {/* Glassmorphic Header */}
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-white/50 bg-white/65 px-4 backdrop-blur-xl shadow-xs dark:border-white/10 dark:bg-slate-900/65 sm:px-6 lg:h-20 lg:px-8">
           <div className="flex items-center gap-3 lg:hidden">
-            <div className="grid size-10 place-items-center overflow-hidden rounded-lg bg-white p-0.5 shadow-sm ring-1 ring-border">
-              <Image src="/apptuario-mark.png" alt="" width={40} height={40} className="size-full object-contain" priority />
+            <div className="grid size-10 place-items-center overflow-hidden rounded-xl bg-white/90 p-1 shadow-sm ring-1 ring-white/80 backdrop-blur-md">
+              <Image src="/apptuario-mark.png" alt="AppTuario" width={40} height={40} className="size-full object-contain" priority />
             </div>
-            <span className="font-heading text-xl font-semibold">AppTuario</span>
+            <span className="font-heading text-xl font-bold text-primary">AppTuario</span>
           </div>
+
           <div className="hidden lg:block">
-            <p className="text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground">Domingo, 30 de agosto</p>
-            <p className="mt-0.5 text-sm font-semibold">Juzgado Segundo de Distrito en Materia Administrativa</p>
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground">Domingo, 30 de agosto</p>
+            <p className="mt-0.5 text-sm font-semibold text-foreground/90">Juzgado Segundo de Distrito en Materia Administrativa</p>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Button variant="outline" size="icon-lg" aria-label="Ver notificaciones" className="relative cursor-pointer rounded-full">
-              <Bell aria-hidden="true" />
-              <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-accent-foreground ring-2 ring-background" />
+
+          <div className="flex items-center gap-2.5 sm:gap-3.5">
+            <Button variant="glass" size="icon-lg" aria-label="Ver notificaciones" className="relative size-10 rounded-full">
+              <Bell aria-hidden="true" className="size-4.5 text-foreground/80" />
+              <span className="absolute right-2 top-2 size-2 rounded-full bg-amber-500 ring-2 ring-white shadow-xs" />
             </Button>
+
             <div className="hidden text-right sm:block">
               <p className="text-sm font-bold leading-tight">Lic. Alejandra Torres</p>
-              <p className="text-xs text-muted-foreground">Actuaria judicial</p>
+              <p className="text-[11px] font-semibold text-muted-foreground">Actuaria judicial</p>
             </div>
-            <div aria-hidden="true" className="grid size-10 place-items-center rounded-full bg-primary text-sm font-bold text-primary-foreground">AT</div>
+
+            <div
+              aria-hidden="true"
+              className="grid size-10 place-items-center rounded-full bg-gradient-to-br from-primary to-blue-700 text-sm font-bold text-white shadow-md ring-2 ring-white/80"
+            >
+              AT
+            </div>
           </div>
         </header>
 
+        {/* Dashboard View */}
         <main id="inicio" className="mx-auto max-w-[1480px] px-4 pb-28 pt-6 sm:px-6 lg:px-8 lg:pb-10 lg:pt-8">
           {activeView === 'Inicio' ? (
             <>
-          <section className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="mb-1 text-sm font-semibold text-accent-foreground">Buen día, Alejandra</p>
-              <h1 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">Tu jornada de notificaciones</h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-                Organiza los asuntos de hoy, documenta cada diligencia y deja listas tus razones actuariales.
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 min-[430px]:flex-row">
-              <Button onClick={() => setModal('upload')} variant="outline" size="lg" className="h-11 cursor-pointer justify-center px-4">
-                <Upload aria-hidden="true" />
-                Cargar acuerdo
-              </Button>
-              <Button onClick={() => setModal('notification')} size="lg" className="h-11 cursor-pointer justify-center bg-accent-foreground px-4 text-white hover:bg-accent-foreground/90">
-                <Plus aria-hidden="true" />
-                Nueva notificación
-              </Button>
-            </div>
-          </section>
-
-          <section aria-label="Resumen del día" className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <Metric icon={Gavel} label="Diligencias de hoy" value="6" note="3 aún pendientes" />
-            <Metric icon={FileCheck2} label="Razones por elaborar" value="3" note="2 con evidencia completa" />
-            <Metric icon={CalendarDays} label="Próximos vencimientos" value="2" note="Dentro de las próximas 48 h" />
-            <Metric icon={Navigation} label="Recorrido estimado" value="28 km" note="1 h 42 min en traslado" />
-          </section>
-
-          <section className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(330px,0.75fr)]">
-            <Card className="border-0 shadow-[0_8px_30px_rgba(15,23,42,0.06)] ring-1 ring-border">
-              <CardHeader className="border-b border-border py-5">
-                <CardTitle className="font-heading text-xl font-semibold">Ruta de hoy</CardTitle>
-                <CardDescription>3 de 6 diligencias pendientes · inicia en 18 minutos</CardDescription>
-                <CardAction>
-                  <Button onClick={() => setActiveView('Ruta diaria')} variant="outline" size="sm" className="cursor-pointer">
-                    <Route aria-hidden="true" />
-                    Ver ruta
-                  </Button>
-                </CardAction>
-              </CardHeader>
-              <CardContent className="p-0">
-                <ol className="divide-y divide-border">
-                  {notifications.map((item, index) => (
-                    <li key={`${item.time}-${item.name}`}>
-                      <button type="button" onClick={() => setModal('evidence')} className="group grid min-h-[112px] w-full cursor-pointer grid-cols-[52px_minmax(0,1fr)_auto] gap-3 p-4 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:grid-cols-[72px_minmax(0,1fr)_auto] sm:gap-4 sm:p-5">
-                        <div className="pt-0.5 text-center">
-                          <span className="block text-sm font-extrabold tabular-nums text-primary">{item.time}</span>
-                          <span className="mt-1 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Parada {index + 1}</span>
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <Badge variant="outline" className={item.tone === 'amber' ? 'border-amber-300 bg-amber-50 text-amber-800' : item.tone === 'blue' ? 'border-blue-200 bg-blue-50 text-blue-800' : 'bg-slate-50'}>{item.type}</Badge>
-                            <span className="text-xs font-semibold text-muted-foreground">{item.case}</span>
-                          </div>
-                          <h2 className="mt-2 truncate text-sm font-bold sm:text-base">{item.name}</h2>
-                          <p className="mt-1 flex items-start gap-1.5 text-xs leading-5 text-muted-foreground sm:text-sm">
-                            <MapPin aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
-                            <span>{item.address}</span>
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2 self-center">
-                          <span className="hidden text-xs font-semibold text-muted-foreground md:block">{item.status}</span>
-                          <ChevronRight aria-hidden="true" className="size-5 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-                        </div>
-                      </button>
-                    </li>
-                  ))}
-                </ol>
-              </CardContent>
-            </Card>
-
-            <div className="space-y-6">
-              <Card className="border-0 bg-primary text-primary-foreground shadow-[0_12px_32px_rgba(30,58,138,0.18)] ring-0">
-                <CardHeader>
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="grid size-10 place-items-center rounded-xl bg-white/12"><Navigation aria-hidden="true" className="size-5" /></span>
-                    <Badge className="bg-white/12 text-white">Ruta optimizada</Badge>
-                  </div>
-                  <CardTitle className="font-heading text-xl font-semibold text-white">Todo listo para salir</CardTitle>
-                  <CardDescription className="text-blue-100">Las primeras tres direcciones fueron ordenadas por cercanía y horario.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-4 flex items-center justify-between text-xs font-semibold text-blue-100">
-                    <span>Preparación de jornada</span>
-                    <span>82%</span>
-                  </div>
-                  <Progress value={82} className="[&_[data-slot=progress-track]]:bg-white/20 [&_[data-slot=progress-indicator]]:bg-amber-400" />
-                  <Button onClick={() => setRouteStarted((value) => !value)} size="lg" className="mt-5 h-11 w-full cursor-pointer bg-white text-primary hover:bg-blue-50">
-                    <Navigation aria-hidden="true" />
-                    {routeStarted ? 'Recorrido en curso' : 'Iniciar recorrido'}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-[0_8px_30px_rgba(15,23,42,0.06)] ring-1 ring-border">
-                <CardHeader>
-                  <CardTitle className="font-heading text-lg font-semibold">Evidencia por completar</CardTitle>
-                  <CardDescription>Capturas pendientes de tus últimas diligencias</CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-3">
-                  <EvidenceButton onClick={() => setModal('evidence')} icon={Camera} label="Fotografías" count="2 pendientes" />
-                  <EvidenceButton onClick={() => setModal('evidence')} icon={Mic} label="Notas de voz" count="1 sin revisar" />
-                </CardContent>
-              </Card>
-
-              <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950">
-                <Clock3 aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-amber-700" />
+              {/* Hero Section */}
+              <section className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <p className="text-sm font-bold">Citatorio para seguimiento</p>
-                  <p className="mt-1 text-xs leading-5 text-amber-900/80">La segunda visita de A.I. 376/2026 está programada mañana a las 10:00.</p>
+                  <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/60 bg-amber-50/80 px-3 py-1 text-xs font-extrabold text-amber-900 shadow-xs backdrop-blur-md">
+                    <Sparkles className="size-3.5 text-amber-600" />
+                    <span>Jornada Actuarial Activa</span>
+                  </div>
+                  <h1 className="mt-2.5 font-heading text-3xl font-semibold tracking-tight sm:text-4xl text-foreground">
+                    Tu jornada de notificaciones
+                  </h1>
+                  <p className="mt-1.5 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+                    Organiza los asuntos de hoy, documenta cada diligencia y genera razones actuariales con respaldo de evidencia.
+                  </p>
                 </div>
-              </div>
-            </div>
-          </section>
+
+                <div className="flex flex-col gap-2.5 min-[430px]:flex-row">
+                  <Button onClick={() => setModal('upload')} variant="glass" size="lg" className="h-11 justify-center px-4 font-semibold">
+                    <Upload aria-hidden="true" className="text-primary" />
+                    Cargar acuerdo
+                  </Button>
+                  <Button onClick={() => setModal('notification')} variant="glass-accent" size="lg" className="h-11 justify-center px-5 font-semibold text-white">
+                    <Plus aria-hidden="true" />
+                    Nueva notificación
+                  </Button>
+                </div>
+              </section>
+
+              {/* Metrics Grid */}
+              <section aria-label="Resumen del día" className="mt-7 grid gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
+                <Metric icon={Gavel} label="Diligencias de hoy" value="6" note="3 aún pendientes" tone="primary" />
+                <Metric icon={FileCheck2} label="Razones por elaborar" value="3" note="2 con evidencia completa" tone="amber" />
+                <Metric icon={CalendarDays} label="Próximos vencimientos" value="2" note="Dentro de las próximas 48 h" tone="blue" />
+                <Metric icon={Navigation} label="Recorrido estimado" value="28 km" note="1 h 42 min en traslado" tone="teal" />
+              </section>
+
+              {/* Main Content Split: Route & HUD Card */}
+              <section className="mt-7 grid items-start gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(340px,0.75fr)]">
+                {/* Route List Card */}
+                <div className="glass-panel rounded-3xl border border-white/80 p-0 shadow-[0_12px_36px_rgba(30,58,138,0.04)] overflow-hidden">
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/60 bg-white/40 p-5 sm:px-6">
+                    <div>
+                      <h2 className="font-heading text-xl font-semibold">Ruta de hoy</h2>
+                      <p className="mt-0.5 text-xs font-semibold text-muted-foreground">3 de 6 diligencias pendientes · Inicia en 18 minutos</p>
+                    </div>
+                    <Button onClick={() => setActiveView('Ruta diaria')} variant="glass" size="sm" className="font-semibold text-xs">
+                      <Route aria-hidden="true" className="text-primary size-3.5" />
+                      Ver mapa completo
+                    </Button>
+                  </div>
+
+                  <ol className="divide-y divide-white/50 p-2 sm:p-3">
+                    {notifications.map((item, index) => (
+                      <li key={`${item.time}-${item.name}`}>
+                        <button
+                          type="button"
+                          onClick={() => setModal('evidence')}
+                          aria-label={`Diligencia a ${item.name}, ${item.address}, programada a las ${item.time}`}
+                          className="group grid min-h-[104px] w-full cursor-pointer grid-cols-[52px_minmax(0,1fr)_auto] gap-3 rounded-2xl p-3.5 text-left transition-all duration-200 hover:border-white/90 hover:bg-white/80 hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:grid-cols-[68px_minmax(0,1fr)_auto] sm:gap-4 sm:p-4"
+                        >
+                          <div className="pt-0.5 text-center">
+                            <span className="block font-heading text-base font-bold tabular-nums text-primary sm:text-lg">{item.time}</span>
+                            <span className="mt-0.5 block text-[9.5px] font-extrabold uppercase tracking-wider text-muted-foreground">Parada {index + 1}</span>
+                          </div>
+
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <Badge variant={item.tone === 'amber' ? 'glass-amber' : item.tone === 'blue' ? 'glass-blue' : 'glass'}>
+                                {item.type}
+                              </Badge>
+                              <span className="text-xs font-semibold text-muted-foreground/90">{item.case}</span>
+                            </div>
+                            <h3 className="mt-1.5 truncate text-sm font-bold sm:text-base text-foreground group-hover:text-primary transition-colors">
+                              {item.name}
+                            </h3>
+                            <p className="mt-1 flex items-start gap-1.5 text-xs leading-5 text-muted-foreground sm:text-sm">
+                              <MapPin aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-primary/70" />
+                              <span className="truncate">{item.address}</span>
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-2 self-center pr-1">
+                            <span className="hidden text-xs font-semibold text-muted-foreground md:block">{item.status}</span>
+                            <span className="grid size-8 place-items-center rounded-xl bg-white/70 border border-white/80 text-muted-foreground shadow-2xs transition-all group-hover:translate-x-0.5 group-hover:bg-primary group-hover:text-white">
+                              <ChevronRight aria-hidden="true" className="size-4" />
+                            </span>
+                          </div>
+                        </button>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+
+                {/* Right Column: Navy Glass Status & Quick Actions */}
+                <div className="space-y-6">
+                  {/* Navy Glassmorphic Journey Card */}
+                  <div className="glass-card-navy rounded-3xl p-6 text-white">
+                    <div className="mb-3 flex items-center justify-between">
+                      <span className="grid size-10 place-items-center rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 shadow-xs">
+                        <Navigation aria-hidden="true" className="size-5 text-white" />
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-full border border-white/25 bg-white/15 px-3 py-0.5 text-xs font-extrabold text-white backdrop-blur-md">
+                        Ruta optimizada
+                      </span>
+                    </div>
+
+                    <h2 className="font-heading text-2xl font-bold text-white tracking-tight">Todo listo para salir</h2>
+                    <p className="mt-1 text-xs leading-5 text-blue-100/90">
+                      Las primeras tres direcciones fueron ordenadas por cercanía, horario hábil y juzgado correspondiente.
+                    </p>
+
+                    <div className="mt-5">
+                      <div className="mb-2 flex items-center justify-between text-xs font-bold text-blue-100">
+                        <span>Preparación de jornada</span>
+                        <span>82%</span>
+                      </div>
+                      <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/20 p-0.5 backdrop-blur-md">
+                        <div className="h-full rounded-full bg-gradient-to-r from-amber-400 to-amber-300 shadow-sm" style={{ width: '82%' }} />
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={() => setRouteStarted((value) => !value)}
+                      size="lg"
+                      className="mt-6 h-12 w-full font-bold bg-white text-primary hover:bg-blue-50 shadow-md transition-all active:scale-[0.98]"
+                    >
+                      <Navigation aria-hidden="true" className={routeStarted ? 'animate-pulse' : ''} />
+                      {routeStarted ? 'Recorrido en curso' : 'Iniciar recorrido'}
+                    </Button>
+                  </div>
+
+                  {/* Evidence Quick Access */}
+                  <div className="glass-panel rounded-3xl p-5 border border-white/80 shadow-[0_10px_30px_rgba(30,58,138,0.04)]">
+                    <h3 className="font-heading text-lg font-semibold text-foreground">Evidencia por completar</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">Capturas pendientes de tus últimas diligencias</p>
+
+                    <div className="mt-4 grid grid-cols-2 gap-3">
+                      <EvidenceButton onClick={() => setModal('evidence')} icon={Camera} label="Fotografías" count="2 pendientes" />
+                      <EvidenceButton onClick={() => setModal('evidence')} icon={Mic} label="Notas de voz" count="1 sin revisar" />
+                    </div>
+                  </div>
+
+                  {/* Amber Follow-up Alert */}
+                  <div className="glass-card-amber rounded-2xl p-4.5 text-amber-950 flex items-start gap-3.5">
+                    <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-amber-500/20 text-amber-800 border border-amber-500/30">
+                      <Clock3 aria-hidden="true" className="size-4.5" />
+                    </span>
+                    <div>
+                      <p className="text-sm font-bold text-amber-950">Citatorio para seguimiento</p>
+                      <p className="mt-1 text-xs leading-5 text-amber-900/85">
+                        La segunda visita de A.I. 376/2026 está programada para mañana a las 10:00 h.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
             </>
           ) : (
             <WorkspaceView view={activeView} onBack={() => setActiveView('Inicio')} onOpen={setModal} />
@@ -279,10 +335,25 @@ export default function Home() {
         </main>
       </div>
 
-      <nav aria-label="Navegación móvil" className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-background/97 px-1 pb-[max(6px,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur lg:hidden">
+      {/* Floating Glass Bottom Nav for Mobile */}
+      <nav
+        aria-label="Navegación móvil"
+        className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-2xl border border-white/75 bg-white/80 p-1.5 shadow-[0_8px_32px_rgba(15,23,42,0.12)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/80 lg:hidden"
+      >
         {navItems.map(({ label, icon: Icon }) => (
-          <button type="button" onClick={() => setActiveView(label)} key={label} aria-current={activeView === label ? 'page' : undefined} aria-label={label} className={`flex min-h-14 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg text-[10px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activeView === label ? 'text-primary' : 'text-muted-foreground hover:bg-muted'}`}>
-            <Icon aria-hidden="true" className="size-5" />
+          <button
+            type="button"
+            onClick={() => setActiveView(label)}
+            key={label}
+            aria-current={activeView === label ? 'page' : undefined}
+            aria-label={label}
+            className={`flex min-h-12 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-bold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+              activeView === label
+                ? 'bg-primary text-white shadow-xs'
+                : 'text-muted-foreground hover:bg-white/60 hover:text-foreground'
+            }`}
+          >
+            <Icon aria-hidden="true" className="size-4.5" />
             <span className="max-w-full truncate px-1">{label === 'Ruta diaria' ? 'Ruta' : label}</span>
           </button>
         ))}
@@ -315,19 +386,24 @@ function WorkspaceView({
     <section aria-labelledby="workspace-title">
       <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div>
-          <Button onClick={onBack} variant="ghost" size="sm" className="mb-3 -ml-2 cursor-pointer lg:hidden">
+          <Button onClick={onBack} variant="glass" size="sm" className="mb-3 -ml-1 lg:hidden">
             <ArrowLeft aria-hidden="true" /> Volver
           </Button>
-          <p className="mb-1 text-sm font-semibold text-accent-foreground">Espacio de trabajo</p>
-          <h1 id="workspace-title" className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">{view}</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">{descriptions[view]}</p>
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-200/70 bg-blue-50/75 px-3 py-0.5 text-xs font-extrabold text-primary shadow-xs backdrop-blur-md">
+            Espacio de trabajo
+          </div>
+          <h1 id="workspace-title" className="mt-2 font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
+            {view}
+          </h1>
+          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">{descriptions[view]}</p>
         </div>
+
         {view === 'Expedientes' ? (
-          <Button onClick={() => onOpen('upload')} size="lg" className="h-11 cursor-pointer bg-accent-foreground px-4 text-white hover:bg-accent-foreground/90">
+          <Button onClick={() => onOpen('upload')} variant="glass-accent" size="lg" className="h-11 px-5 font-semibold text-white">
             <Upload aria-hidden="true" /> Cargar acuerdo
           </Button>
         ) : view === 'Plantillas' ? (
-          <Button onClick={() => onOpen('upload')} size="lg" className="h-11 cursor-pointer bg-accent-foreground px-4 text-white hover:bg-accent-foreground/90">
+          <Button onClick={() => onOpen('upload')} variant="glass-accent" size="lg" className="h-11 px-5 font-semibold text-white">
             <Plus aria-hidden="true" /> Agregar plantilla
           </Button>
         ) : null}
@@ -348,35 +424,59 @@ function CasesView({ onOpen }: { onOpen: (mode: ModalMode) => void }) {
     ['376/2026', 'Juzgado Primero de Distrito', 'José Antonio Mejía', 'Segunda visita', 'Mañana, 10:00'],
     ['92/2026', 'Tribunal Colegiado', 'Juzgado Décimo de Distrito', 'Oficio', 'Hoy, 13:00'],
   ];
+
   return (
     <div className="mt-7 space-y-4">
-      <label className="flex h-11 max-w-xl items-center gap-2 rounded-lg border border-input bg-card px-3 focus-within:ring-2 focus-within:ring-ring">
-        <Search aria-hidden="true" className="size-4 text-muted-foreground" />
+      <label className="flex h-12 max-w-xl items-center gap-3 rounded-2xl border border-white/80 bg-white/70 px-4 shadow-xs backdrop-blur-md transition-all focus-within:border-primary focus-within:bg-white/95 focus-within:ring-3 focus-within:ring-primary/20">
+        <Search aria-hidden="true" className="size-4.5 text-muted-foreground" />
         <span className="sr-only">Buscar expediente</span>
-        <input type="search" placeholder="Buscar por expediente, juzgado o destinatario" className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
+        <input
+          type="search"
+          placeholder="Buscar por expediente, juzgado o destinatario…"
+          className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+        />
       </label>
-      <Card className="border-0 shadow-sm ring-1 ring-border">
-        <CardContent className="p-0">
-          <div className="hidden grid-cols-[120px_1fr_1.3fr_130px_130px_44px] gap-4 border-b border-border bg-muted/40 px-5 py-3 text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground md:grid">
-            <span>Expediente</span><span>Órgano</span><span>Destinatario</span><span>Actuación</span><span>Programación</span><span />
-          </div>
-          <div className="divide-y divide-border">
-            {cases.map((item) => (
-              <button onClick={() => onOpen('evidence')} type="button" key={item[0]} className="grid w-full cursor-pointer gap-2 px-4 py-4 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring md:grid-cols-[120px_1fr_1.3fr_130px_130px_44px] md:items-center md:gap-4 md:px-5">
-                <span className="font-extrabold text-primary">A.I. {item[0]}</span>
-                <span className="text-sm font-semibold">{item[1]}</span>
-                <span className="text-sm">{item[2]}</span>
-                <Badge variant="outline" className="w-fit">{item[3]}</Badge>
-                <span className="text-xs font-semibold text-muted-foreground">{item[4]}</span>
-                <ChevronRight aria-hidden="true" className="hidden size-4 text-muted-foreground md:block" />
-              </button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-      <div className="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4 text-blue-950">
-        <CircleAlert aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-blue-700" />
-        <p className="text-xs leading-5"><strong>Control humano obligatorio.</strong> AppTuario puede proponer datos a partir del documento, pero el actuario debe cotejarlos con el acuerdo o sentencia antes de generar cualquier formato.</p>
+
+      <div className="glass-panel overflow-hidden rounded-3xl border border-white/80 shadow-sm">
+        <div className="hidden grid-cols-[120px_1fr_1.3fr_130px_130px_44px] gap-4 border-b border-white/60 bg-white/40 px-6 py-3.5 text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground md:grid">
+          <span>Expediente</span>
+          <span>Órgano</span>
+          <span>Destinatario</span>
+          <span>Actuación</span>
+          <span>Programación</span>
+          <span />
+        </div>
+
+        <div className="divide-y divide-white/50">
+          {cases.map((item) => (
+            <button
+              onClick={() => onOpen('evidence')}
+              type="button"
+              key={item[0]}
+              className="group grid w-full cursor-pointer gap-2 p-4 text-left transition-all duration-200 hover:bg-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary md:grid-cols-[120px_1fr_1.3fr_130px_130px_44px] md:items-center md:gap-4 md:px-6 md:py-4"
+            >
+              <span className="font-extrabold text-primary">A.I. {item[0]}</span>
+              <span className="text-sm font-semibold">{item[1]}</span>
+              <span className="text-sm text-foreground/90">{item[2]}</span>
+              <Badge variant="glass-blue" className="w-fit">
+                {item[3]}
+              </Badge>
+              <span className="text-xs font-semibold text-muted-foreground">{item[4]}</span>
+              <span className="hidden size-7 place-items-center rounded-lg bg-white/70 border border-white/80 text-muted-foreground transition-all group-hover:translate-x-0.5 group-hover:bg-primary group-hover:text-white md:grid">
+                <ChevronRight aria-hidden="true" className="size-4" />
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="glass-card-blue-alert flex items-start gap-3.5 rounded-2xl p-4.5 text-blue-950">
+        <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-blue-500/20 text-blue-800 border border-blue-500/30">
+          <CircleAlert aria-hidden="true" className="size-4.5" />
+        </span>
+        <p className="text-xs leading-5">
+          <strong>Control humano obligatorio:</strong> AppTuario puede proponer datos a partir del documento, pero el actuario debe cotejarlos con el acuerdo o sentencia antes de generar cualquier formato formal.
+        </p>
       </div>
     </div>
   );
@@ -384,50 +484,108 @@ function CasesView({ onOpen }: { onOpen: (mode: ModalMode) => void }) {
 
 function RouteView({ onOpen }: { onOpen: (mode: ModalMode) => void }) {
   return (
-    <div className="mt-7 grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
-      <Card className="min-h-[430px] border-0 bg-[#e8edf1] shadow-sm ring-1 ring-border">
-        <CardContent className="relative min-h-[430px] overflow-hidden p-0">
-          <div aria-hidden="true" className="absolute inset-0 opacity-45 [background-image:linear-gradient(#cbd5df_1px,transparent_1px),linear-gradient(90deg,#cbd5df_1px,transparent_1px)] [background-size:42px_42px]" />
-          <svg viewBox="0 0 700 430" className="absolute inset-0 h-full w-full">
-            <title>Representación esquemática de la ruta diaria</title>
-            <path d="M95 320 C170 260, 160 145, 265 130 S410 230, 500 150 S585 90, 625 65" fill="none" stroke="#1E3A8A" strokeWidth="7" strokeLinecap="round" strokeDasharray="2 14" />
-            {[[95,320],[265,130],[500,150],[625,65]].map(([x,y], i) => <g key={i}><circle cx={x} cy={y} r="20" fill="#1E3A8A"/><text x={x} y={y+5} textAnchor="middle" fill="white" fontSize="14" fontWeight="700">{i+1}</text></g>)}
-          </svg>
-          <div className="absolute left-4 top-4 rounded-xl bg-white/95 p-4 shadow-lg backdrop-blur">
-            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Ruta sugerida</p>
-            <p className="mt-1 text-xl font-extrabold">28 km · 1 h 42 min</p>
-            <p className="mt-1 text-xs text-muted-foreground">Sin considerar tiempo de diligencia</p>
-          </div>
-        </CardContent>
-      </Card>
-      <Card className="border-0 shadow-sm ring-1 ring-border">
-        <CardHeader><CardTitle className="font-heading text-xl font-semibold">Orden de visita</CardTitle><CardDescription>Calculado por cercanía y horarios registrados</CardDescription></CardHeader>
-        <CardContent className="space-y-3">
+    <div className="mt-7 grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
+      {/* Schematic Map Card */}
+      <div className="glass-panel relative min-h-[440px] overflow-hidden rounded-3xl border border-white/80 shadow-md">
+        <div aria-hidden="true" className="absolute inset-0 opacity-40 [background-image:linear-gradient(#cbd5df_1px,transparent_1px),linear-gradient(90deg,#cbd5df_1px,transparent_1px)] [background-size:40px_40px]" />
+        
+        <svg viewBox="0 0 700 430" className="absolute inset-0 h-full w-full">
+          <title>Representación esquemática de la ruta diaria</title>
+          <path
+            d="M95 320 C170 260, 160 145, 265 130 S410 230, 500 150 S585 90, 625 65"
+            fill="none"
+            stroke="#1E3A8A"
+            strokeWidth="8"
+            strokeLinecap="round"
+            strokeDasharray="3 16"
+            className="drop-shadow-sm"
+          />
+          {[
+            [95, 320],
+            [265, 130],
+            [500, 150],
+            [625, 65],
+          ].map(([x, y], i) => (
+            <g key={i} className="cursor-pointer">
+              <circle cx={x} cy={y} r="22" fill="#1E3A8A" className="drop-shadow-md" />
+              <circle cx={x} cy={y} r="26" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="3" />
+              <text x={x} y={y + 5} textAnchor="middle" fill="white" fontSize="14" fontWeight="800">
+                {i + 1}
+              </text>
+            </g>
+          ))}
+        </svg>
+
+        {/* Floating HUD Card */}
+        <div className="glass-panel absolute left-5 top-5 rounded-2xl p-4.5 shadow-xl border border-white/90 backdrop-blur-2xl">
+          <p className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">Ruta sugerida</p>
+          <p className="mt-1 font-heading text-2xl font-bold text-foreground">28 km · 1 h 42 min</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">Sin considerar tiempo de diligencia</p>
+        </div>
+      </div>
+
+      {/* Stop order card */}
+      <div className="glass-panel rounded-3xl border border-white/80 p-5 shadow-sm space-y-4">
+        <div>
+          <h2 className="font-heading text-xl font-semibold">Orden de visita</h2>
+          <p className="text-xs text-muted-foreground">Calculado por cercanía y horarios registrados</p>
+        </div>
+
+        <div className="space-y-2.5">
           {notifications.map((item, index) => (
-            <button onClick={() => onOpen('evidence')} key={item.time} type="button" className="flex w-full cursor-pointer items-center gap-3 rounded-xl border border-border p-3 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-xs font-extrabold text-white">{index + 1}</span>
-              <span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold">{item.name}</span><span className="block truncate text-xs text-muted-foreground">{item.time} · {item.address}</span></span>
+            <button
+              onClick={() => onOpen('evidence')}
+              key={item.time}
+              type="button"
+              className="glass-panel-interactive flex w-full cursor-pointer items-center gap-3.5 rounded-2xl p-3.5 text-left border border-white/70"
+            >
+              <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-primary text-xs font-extrabold text-white shadow-xs">
+                {index + 1}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-bold text-foreground">{item.name}</span>
+                <span className="block truncate text-xs text-muted-foreground font-medium">
+                  {item.time} · {item.address}
+                </span>
+              </span>
               <ChevronRight aria-hidden="true" className="size-4 text-muted-foreground" />
             </button>
           ))}
-          <Button className="mt-2 h-11 w-full cursor-pointer"><Navigation aria-hidden="true" />Abrir primera diligencia</Button>
-        </CardContent>
-      </Card>
+        </div>
+
+        <Button onClick={() => onOpen('evidence')} variant="glass-primary" size="lg" className="h-11 w-full font-bold">
+          <Navigation aria-hidden="true" />
+          Abrir primera diligencia
+        </Button>
+      </div>
     </div>
   );
 }
 
 function CalendarView() {
   const days = ['Lun 31', 'Mar 1', 'Mié 2', 'Jue 3', 'Vie 4'];
+
   return (
     <div className="mt-7 grid gap-6 xl:grid-cols-[1fr_340px]">
-      <Card className="border-0 shadow-sm ring-1 ring-border">
-        <CardHeader><CardTitle className="font-heading text-xl font-semibold">Semana de trabajo</CardTitle><CardDescription>31 de agosto al 4 de septiembre de 2026</CardDescription></CardHeader>
-        <CardContent className="overflow-x-auto">
-          <div className="grid min-w-[720px] grid-cols-5 divide-x divide-border rounded-xl border border-border">
+      <div className="glass-panel rounded-3xl border border-white/80 p-5 shadow-sm">
+        <div className="mb-4">
+          <h2 className="font-heading text-xl font-semibold">Semana de trabajo</h2>
+          <p className="text-xs text-muted-foreground">31 de agosto al 4 de septiembre de 2026</p>
+        </div>
+
+        <div className="overflow-x-auto">
+          <div className="grid min-w-[720px] grid-cols-5 divide-x divide-white/60 rounded-2xl border border-white/70 bg-white/30 backdrop-blur-md">
             {days.map((day, index) => (
-              <div key={day} className="min-h-[390px] p-3">
-                <p className={`rounded-lg px-2 py-2 text-center text-xs font-extrabold ${index === 0 ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}>{day}</p>
+              <div key={day} className="min-h-[390px] p-3.5">
+                <p
+                  className={`rounded-xl px-2 py-2 text-center text-xs font-extrabold shadow-xs ${
+                    index === 0
+                      ? 'bg-primary text-white shadow-sm'
+                      : 'bg-white/70 text-foreground/80 border border-white/75'
+                  }`}
+                >
+                  {day}
+                </p>
                 {index === 0 ? <CalendarEvent time="10:00" title="Segunda visita" note="A.I. 376/2026" tone="amber" /> : null}
                 {index === 1 ? <CalendarEvent time="09:30" title="Notificación personal" note="A.I. 601/2026" tone="blue" /> : null}
                 {index === 2 ? <CalendarEvent time="12:00" title="Vence plazo" note="A.I. 428/2026" tone="red" /> : null}
@@ -435,11 +593,21 @@ function CalendarView() {
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+
       <div className="space-y-4">
-        <Card className="border-0 shadow-sm ring-1 ring-border"><CardHeader><CardTitle className="font-heading text-lg font-semibold">Pendientes de reprogramar</CardTitle></CardHeader><CardContent className="space-y-3"><Pending title="Domicilio cerrado" caseId="A.I. 455/2026" /><Pending title="Esperando horario hábil" caseId="A.I. 390/2026" /></CardContent></Card>
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-amber-950"><strong>Regla de agenda:</strong> las segundas visitas derivadas de citatorio se muestran como pendientes hasta que el usuario confirme fecha y hora.</div>
+        <div className="glass-panel rounded-3xl border border-white/80 p-5 shadow-sm">
+          <h3 className="font-heading text-lg font-semibold">Pendientes de reprogramar</h3>
+          <div className="mt-3.5 space-y-2.5">
+            <Pending title="Domicilio cerrado" caseId="A.I. 455/2026" />
+            <Pending title="Esperando horario hábil" caseId="A.I. 390/2026" />
+          </div>
+        </div>
+
+        <div className="glass-card-amber rounded-2xl p-4 text-xs leading-5 text-amber-950">
+          <strong>Regla de agenda:</strong> Las segundas visitas derivadas de citatorio se muestran como pendientes hasta que el usuario confirme fecha y hora.
+        </div>
       </div>
     </div>
   );
@@ -452,16 +620,47 @@ function TemplatesView() {
     ['Notificación personal', 'DOCX', 'Formato propio', 'Actualizada el 18 ago'],
     ['Razón actuarial de comparecencia', 'DOCX', 'Formato básico', 'Lista para usar'],
   ];
+
   return (
-    <div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div className="mt-7 grid gap-4.5 md:grid-cols-2 xl:grid-cols-3">
       {templates.map((template) => (
-        <Card key={template[0]} className="border-0 shadow-sm ring-1 ring-border">
-          <CardHeader><div className="mb-3 grid size-11 place-items-center rounded-xl bg-secondary text-primary"><FileText aria-hidden="true" className="size-5" /></div><CardTitle className="font-heading text-lg font-semibold">{template[0]}</CardTitle><CardDescription>{template[3]}</CardDescription></CardHeader>
-          <CardContent><div className="flex items-center gap-2"><Badge variant="outline">{template[1]}</Badge><Badge variant="secondary">{template[2]}</Badge></div><div className="mt-5 flex gap-2"><Button variant="outline" className="flex-1 cursor-pointer">Vista previa</Button><Button variant="ghost" size="icon" aria-label="Descargar plantilla" className="cursor-pointer"><Download aria-hidden="true" /></Button></div></CardContent>
-        </Card>
+        <div key={template[0]} className="glass-panel-interactive flex flex-col justify-between rounded-3xl border border-white/80 p-5.5">
+          <div>
+            <div className="mb-3.5 grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-white/90 to-blue-50/80 text-primary border border-white/90 shadow-xs">
+              <FileText aria-hidden="true" className="size-5.5" />
+            </div>
+            <h3 className="font-heading text-lg font-semibold leading-snug">{template[0]}</h3>
+            <p className="mt-1 text-xs text-muted-foreground">{template[3]}</p>
+          </div>
+
+          <div className="mt-5">
+            <div className="flex items-center gap-2">
+              <Badge variant="glass">{template[1]}</Badge>
+              <Badge variant="glass-blue">{template[2]}</Badge>
+            </div>
+            <div className="mt-4 flex gap-2">
+              <Button variant="glass" className="flex-1 font-semibold text-xs h-9">
+                Vista previa
+              </Button>
+              <Button variant="glass" size="icon" aria-label="Descargar plantilla" className="size-9">
+                <Download aria-hidden="true" className="size-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
       ))}
-      <button type="button" className="min-h-[230px] cursor-pointer rounded-xl border-2 border-dashed border-border bg-muted/30 p-6 text-center transition-colors hover:border-primary/40 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-        <Plus aria-hidden="true" className="mx-auto size-7 text-primary" /><span className="mt-3 block font-bold">Cargar formato propio</span><span className="mt-1 block text-xs leading-5 text-muted-foreground">Usa un archivo Word editable con los campos que acostumbras.</span>
+
+      <button
+        type="button"
+        className="glass-panel flex min-h-[230px] cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-primary/30 p-6 text-center transition-all duration-200 hover:border-primary hover:bg-white/85 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
+          <Plus aria-hidden="true" className="size-6" />
+        </span>
+        <span className="mt-3 block font-bold text-sm text-foreground">Cargar formato propio</span>
+        <span className="mt-1 block max-w-xs text-xs leading-5 text-muted-foreground">
+          Usa un archivo Word editable (.docx) con las variables que acostumbras.
+        </span>
       </button>
     </div>
   );
@@ -471,6 +670,7 @@ function ActionModal({ mode, onClose }: { mode: ModalMode; onClose: () => void }
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
   const titles = { upload: 'Cargar documento', notification: 'Nueva notificación', evidence: 'Registrar diligencia' };
   const descriptions = {
     upload: 'Agrega un acuerdo, sentencia o plantilla en Word o PDF.',
@@ -490,7 +690,7 @@ function ActionModal({ mode, onClose }: { mode: ModalMode; onClose: () => void }
     setSaving(true);
     try {
       const response = await fetch('/api/documents', { method: 'POST', body: new FormData(event.currentTarget) });
-      const payload = await response.json().catch(() => ({})) as { error?: string };
+      const payload = (await response.json().catch(() => ({}))) as { error?: string };
       if (!response.ok) throw new Error(payload.error ?? 'No fue posible guardar el documento.');
       setSubmitted(true);
     } catch (error) {
@@ -501,22 +701,67 @@ function ActionModal({ mode, onClose }: { mode: ModalMode; onClose: () => void }
   }
 
   return (
-    <div role="presentation" className="fixed inset-0 z-50 grid place-items-end bg-slate-950/45 p-0 backdrop-blur-[2px] sm:place-items-center sm:p-5" onMouseDown={(event) => { if (event.currentTarget === event.target) onClose(); }}>
-      <dialog open aria-modal="true" aria-labelledby="modal-title" className="relative m-0 max-h-[92dvh] w-full max-w-none overflow-y-auto rounded-t-2xl bg-card p-5 text-card-foreground shadow-2xl sm:max-w-xl sm:rounded-2xl sm:p-6">
+    <div
+      role="presentation"
+      className="fixed inset-0 z-50 grid place-items-end bg-slate-950/40 p-0 backdrop-blur-md sm:place-items-center sm:p-5"
+      onMouseDown={(event) => {
+        if (event.currentTarget === event.target) onClose();
+      }}
+    >
+      <dialog
+        open
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        className="glass-panel relative m-0 max-h-[92dvh] w-full max-w-none overflow-y-auto rounded-t-3xl border border-white/85 bg-white/90 p-6 text-card-foreground shadow-[0_25px_60px_rgba(15,23,42,0.25)] backdrop-blur-2xl sm:max-w-xl sm:rounded-3xl sm:p-8"
+      >
         <div className="flex items-start justify-between gap-4">
-          <div><p className="text-xs font-bold uppercase tracking-wider text-accent-foreground">AppTuario</p><h2 id="modal-title" className="mt-1 font-heading text-2xl font-semibold">{titles[mode]}</h2><p className="mt-1 text-sm leading-6 text-muted-foreground">{descriptions[mode]}</p></div>
-          <Button onClick={onClose} variant="ghost" size="icon" aria-label="Cerrar" className="cursor-pointer"><X aria-hidden="true" /></Button>
+          <div>
+            <span className="inline-flex items-center rounded-full border border-amber-300/70 bg-amber-50/80 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-900 shadow-xs">
+              AppTuario
+            </span>
+            <h2 id="modal-title" className="mt-2 font-heading text-2xl font-bold text-foreground">
+              {titles[mode]}
+            </h2>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-sm">{descriptions[mode]}</p>
+          </div>
+          <Button onClick={onClose} variant="glass" size="icon" aria-label="Cerrar" className="size-9 rounded-full">
+            <X aria-hidden="true" className="size-4" />
+          </Button>
         </div>
 
         {submitted ? (
-          <div className="py-10 text-center"><span className="mx-auto grid size-14 place-items-center rounded-full bg-emerald-100 text-emerald-700"><Check aria-hidden="true" className="size-7" /></span><h3 className="mt-4 text-lg font-bold">Registro guardado</h3><p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted-foreground">Quedó en borrador para que puedas cotejarlo antes de incorporarlo a una actuación oficial.</p><Button onClick={onClose} className="mt-6 cursor-pointer">Volver al espacio de trabajo</Button></div>
+          <div className="py-10 text-center">
+            <span className="mx-auto grid size-16 place-items-center rounded-2xl bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 shadow-xs">
+              <Check aria-hidden="true" className="size-8" />
+            </span>
+            <h3 className="mt-4 font-heading text-xl font-bold">Registro guardado</h3>
+            <p className="mx-auto mt-2 max-w-sm text-xs leading-6 text-muted-foreground sm:text-sm">
+              Quedó en borrador para que puedas cotejarlo antes de incorporarlo a una actuación oficial.
+            </p>
+            <Button onClick={onClose} variant="glass-primary" size="lg" className="mt-6 font-bold">
+              Volver al espacio de trabajo
+            </Button>
+          </div>
         ) : (
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             {mode === 'upload' ? <UploadFields /> : null}
             {mode === 'notification' ? <NotificationFields /> : null}
             {mode === 'evidence' ? <EvidenceFields /> : null}
-            {errorMessage ? <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-800">{errorMessage}</p> : null}
-            <div className="flex flex-col-reverse gap-2 border-t border-border pt-5 sm:flex-row sm:justify-end"><Button type="button" onClick={onClose} variant="outline" className="h-11 cursor-pointer">Cancelar</Button><Button disabled={saving} type="submit" className="h-11 cursor-pointer bg-accent-foreground px-5 text-white hover:bg-accent-foreground/90">{saving ? 'Guardando…' : 'Guardar borrador'}</Button></div>
+
+            {errorMessage ? (
+              <p role="alert" className="rounded-xl border border-red-200 bg-red-50/90 p-3 text-xs font-semibold text-red-800">
+                {errorMessage}
+              </p>
+            ) : null}
+
+            <div className="flex flex-col-reverse gap-2 border-t border-white/60 pt-5 sm:flex-row sm:justify-end">
+              <Button type="button" onClick={onClose} variant="glass" className="h-11 font-semibold">
+                Cancelar
+              </Button>
+              <Button disabled={saving} type="submit" variant="glass-accent" className="h-11 px-6 font-bold text-white">
+                {saving ? 'Guardando…' : 'Guardar borrador'}
+              </Button>
+            </div>
           </form>
         )}
       </dialog>
@@ -525,51 +770,229 @@ function ActionModal({ mode, onClose }: { mode: ModalMode; onClose: () => void }
 }
 
 function UploadFields() {
-  return <><label className="grid min-h-36 cursor-pointer place-items-center rounded-xl border-2 border-dashed border-border bg-muted/30 p-5 text-center hover:border-primary/40 hover:bg-secondary"><input name="file" required type="file" accept=".doc,.docx,.pdf,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="sr-only" /><span><Upload aria-hidden="true" className="mx-auto size-7 text-primary" /><span className="mt-3 block text-sm font-bold">Selecciona Word o PDF</span><span className="mt-1 block text-xs text-muted-foreground">Máximo permitido: 25 MB</span></span></label><Field label="Tipo de documento"><select name="category" required className="form-control"><option value="">Seleccionar…</option><option value="agreement">Acuerdo</option><option value="judgment">Sentencia</option><option value="template">Plantilla propia</option></select></Field><div className="rounded-lg bg-blue-50 p-3 text-xs leading-5 text-blue-950"><strong>Privacidad:</strong> el archivo se asociará únicamente a tu cuenta. La extracción automática será una propuesta y nunca sustituye tu cotejo.</div></>;
-}
-
-function NotificationFields() {
-  return <div className="grid gap-4 sm:grid-cols-2"><Field label="Expediente"><input required className="form-control" placeholder="Ej. 428/2026" /></Field><Field label="Tipo"><select required className="form-control"><option>Personal</option><option>Citatorio</option><option>Aviso</option><option>Oficio</option></select></Field><div className="sm:col-span-2"><Field label="Destinatario"><input required className="form-control" placeholder="Nombre o autoridad" /></Field></div><div className="sm:col-span-2"><Field label="Domicilio"><textarea required className="form-control min-h-20 resize-y" placeholder="Calle, número, colonia, alcaldía o municipio" /></Field></div><Field label="Fecha"><input required type="date" className="form-control" /></Field><Field label="Hora sugerida"><input required type="time" className="form-control" /></Field></div>;
-}
-
-function EvidenceFields() {
-  return <><Field label="Resultado de la diligencia"><select required className="form-control"><option value="">Seleccionar…</option><option>Notificación practicada</option><option>Se dejó citatorio</option><option>Se fijó aviso</option><option>Domicilio cerrado</option><option>Domicilio incorrecto</option><option>No atendió persona alguna</option><option>Otro resultado</option></select></Field><div className="grid grid-cols-2 gap-3"><label className="capture-control"><Camera aria-hidden="true" className="size-5" /><span className="font-bold">Tomar foto</span><span className="text-[11px] text-muted-foreground">Cámara o archivo</span><input type="file" accept="image/*" capture="environment" className="sr-only" /></label><label className="capture-control"><Mic aria-hidden="true" className="size-5" /><span className="font-bold">Nota de voz</span><span className="text-[11px] text-muted-foreground">Audio de apoyo</span><input type="file" accept="audio/*" capture className="sr-only" /></label></div><Field label="Notas privadas de campo"><textarea className="form-control min-h-24 resize-y" placeholder="Rasgos del inmueble, quién atendió, circunstancias y datos que debas recordar…" /></Field><label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-3 text-xs leading-5"><input required type="checkbox" className="mt-1 size-4 accent-blue-800" /><span>Confirmo que la evidencia es pertinente para la diligencia y que revisaré el borrador de razón antes de firmarlo o integrarlo al expediente.</span></label></>;
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <label className="grid gap-1.5 text-sm font-bold"><span>{label}</span>{children}</label>;
-}
-
-function CalendarEvent({ time, title, note, tone }: { time: string; title: string; note: string; tone: 'amber' | 'blue' | 'red' }) {
-  const color = tone === 'amber' ? 'border-amber-300 bg-amber-50 text-amber-950' : tone === 'red' ? 'border-red-300 bg-red-50 text-red-950' : 'border-blue-300 bg-blue-50 text-blue-950';
-  return <div className={`mt-3 rounded-lg border-l-4 p-3 ${color}`}><span className="text-xs font-extrabold">{time}</span><span className="mt-1 block text-xs font-bold">{title}</span><span className="mt-1 block text-[11px] opacity-75">{note}</span></div>;
-}
-
-function Pending({ title, caseId }: { title: string; caseId: string }) {
-  return <button type="button" className="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-border p-3 text-left hover:bg-muted"><Clock3 aria-hidden="true" className="size-4 text-amber-700" /><span className="flex-1"><span className="block text-sm font-bold">{title}</span><span className="text-xs text-muted-foreground">{caseId}</span></span><ChevronRight aria-hidden="true" className="size-4 text-muted-foreground" /></button>;
-}
-
-function Metric({ icon: Icon, label, value, note }: { icon: typeof Gavel; label: string; value: string; note: string }) {
   return (
-    <Card className="border-0 shadow-xs ring-1 ring-border">
-      <CardContent className="flex items-center gap-4 py-1">
-        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-secondary text-primary"><Icon aria-hidden="true" className="size-5" /></span>
-        <div className="min-w-0">
-          <p className="truncate text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground">{label}</p>
-          <p className="mt-1 text-2xl font-extrabold tracking-tight tabular-nums">{value}</p>
-          <p className="truncate text-xs text-muted-foreground">{note}</p>
-        </div>
-      </CardContent>
-    </Card>
+    <>
+      <label
+        aria-label="Cargar archivo Word o PDF"
+        className="glass-panel grid min-h-36 cursor-pointer place-items-center rounded-2xl border-2 border-dashed border-primary/30 p-5 text-center transition-all hover:border-primary hover:bg-white/80"
+      >
+        <input
+          name="file"
+          required
+          type="file"
+          accept=".doc,.docx,.pdf,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          className="sr-only"
+        />
+        <span>
+          <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
+            <Upload aria-hidden="true" className="size-6" />
+          </span>
+          <span className="mt-3 block text-sm font-bold text-foreground">Selecciona Word o PDF</span>
+          <span className="mt-0.5 block text-xs text-muted-foreground">Máximo permitido: 25 MB</span>
+        </span>
+      </label>
+
+      <Field label="Tipo de documento">
+        <select name="category" required className="form-control">
+          <option value="">Seleccionar…</option>
+          <option value="agreement">Acuerdo</option>
+          <option value="judgment">Sentencia</option>
+          <option value="template">Plantilla propia</option>
+        </select>
+      </Field>
+
+      <div className="glass-card-blue-alert rounded-xl p-3.5 text-xs leading-5 text-blue-950">
+        <strong>Privacidad:</strong> El archivo se asociará únicamente a tu cuenta. La extracción automática será una propuesta y nunca sustituye tu cotejo.
+      </div>
+    </>
   );
 }
 
-function EvidenceButton({ icon: Icon, label, count, onClick }: { icon: typeof Camera; label: string; count: string; onClick: () => void }) {
+function NotificationFields() {
   return (
-    <button onClick={onClick} type="button" className="min-h-[104px] cursor-pointer rounded-xl border border-border bg-muted/40 p-3 text-left transition-colors hover:border-primary/30 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-      <Icon aria-hidden="true" className="size-5 text-primary" />
-      <span className="mt-3 block text-sm font-bold">{label}</span>
-      <span className="mt-0.5 block text-xs text-muted-foreground">{count}</span>
+    <div className="grid gap-4 sm:grid-cols-2">
+      <Field label="Expediente">
+        <input required className="form-control" placeholder="Ej. 428/2026" />
+      </Field>
+      <Field label="Tipo">
+        <select required className="form-control">
+          <option>Personal</option>
+          <option>Citatorio</option>
+          <option>Aviso</option>
+          <option>Oficio</option>
+        </select>
+      </Field>
+      <div className="sm:col-span-2">
+        <Field label="Destinatario">
+          <input required className="form-control" placeholder="Nombre o autoridad" />
+        </Field>
+      </div>
+      <div className="sm:col-span-2">
+        <Field label="Domicilio">
+          <textarea required className="form-control min-h-20 resize-y" placeholder="Calle, número, colonia, alcaldía o municipio" />
+        </Field>
+      </div>
+      <Field label="Fecha">
+        <input required type="date" className="form-control" />
+      </Field>
+      <Field label="Hora sugerida">
+        <input required type="time" className="form-control" />
+      </Field>
+    </div>
+  );
+}
+
+function EvidenceFields() {
+  return (
+    <>
+      <Field label="Resultado de la diligencia">
+        <select required className="form-control">
+          <option value="">Seleccionar…</option>
+          <option>Notificación practicada</option>
+          <option>Se dejó citatorio</option>
+          <option>Se fijó aviso</option>
+          <option>Domicilio cerrado</option>
+          <option>Domicilio incorrecto</option>
+          <option>No atendió persona alguna</option>
+          <option>Otro resultado</option>
+        </select>
+      </Field>
+
+      <div className="grid grid-cols-2 gap-3">
+        <label className="capture-control">
+          <Camera aria-hidden="true" className="size-5" />
+          <span className="font-bold">Tomar foto</span>
+          <span className="text-[11px] text-muted-foreground">Cámara o archivo</span>
+          <input type="file" accept="image/*" capture="environment" className="sr-only" />
+        </label>
+        <label className="capture-control">
+          <Mic aria-hidden="true" className="size-5" />
+          <span className="font-bold">Nota de voz</span>
+          <span className="text-[11px] text-muted-foreground">Audio de apoyo</span>
+          <input type="file" accept="audio/*" capture className="sr-only" />
+        </label>
+      </div>
+
+      <Field label="Notas privadas de campo">
+        <textarea
+          className="form-control min-h-24 resize-y"
+          placeholder="Rasgos del inmueble, quién atendió, circunstancias y datos que debas recordar…"
+        />
+      </Field>
+
+      <label className="glass-panel flex cursor-pointer items-start gap-3 rounded-xl border border-white/70 p-3.5 text-xs leading-5">
+        <input required type="checkbox" className="mt-1 size-4 accent-blue-800" />
+        <span>
+          Confirmo que la evidencia es pertinente para la diligencia y que revisaré el borrador de razón antes de firmarlo o integrarlo al expediente.
+        </span>
+      </label>
+    </>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="grid gap-1.5 text-xs font-bold uppercase tracking-wider text-foreground/80">
+      <span>{label}</span>
+      {children}
+    </label>
+  );
+}
+
+function CalendarEvent({
+  time,
+  title,
+  note,
+  tone,
+}: {
+  time: string;
+  title: string;
+  note: string;
+  tone: 'amber' | 'blue' | 'red';
+}) {
+  const colorClass =
+    tone === 'amber'
+      ? 'border-amber-400/80 bg-amber-50/85 text-amber-950'
+      : tone === 'red'
+      ? 'border-red-400/80 bg-red-50/85 text-red-950'
+      : 'border-blue-400/80 bg-blue-50/85 text-blue-950';
+
+  return (
+    <div className={`mt-3 rounded-xl border-l-4 p-3 shadow-2xs backdrop-blur-sm ${colorClass}`}>
+      <span className="text-xs font-extrabold">{time}</span>
+      <span className="mt-1 block text-xs font-bold">{title}</span>
+      <span className="mt-0.5 block text-[11px] opacity-80">{note}</span>
+    </div>
+  );
+}
+
+function Pending({ title, caseId }: { title: string; caseId: string }) {
+  return (
+    <button
+      type="button"
+      className="glass-panel-interactive flex w-full cursor-pointer items-center gap-3 rounded-2xl p-3 text-left border border-white/70"
+    >
+      <Clock3 aria-hidden="true" className="size-4 text-amber-700 shrink-0" />
+      <span className="flex-1 min-w-0">
+        <span className="block text-sm font-bold text-foreground truncate">{title}</span>
+        <span className="text-xs text-muted-foreground font-medium">{caseId}</span>
+      </span>
+      <ChevronRight aria-hidden="true" className="size-4 text-muted-foreground" />
+    </button>
+  );
+}
+
+function Metric({
+  icon: Icon,
+  label,
+  value,
+  note,
+  tone: _tone,
+}: {
+  icon: typeof Gavel;
+  label: string;
+  value: string;
+  note: string;
+  tone?: 'primary' | 'amber' | 'blue' | 'teal';
+}) {
+  return (
+    <div className="glass-panel-interactive flex items-center gap-4 rounded-3xl border border-white/80 p-4.5 shadow-[0_8px_24px_rgba(30,58,138,0.04)]">
+      <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-white/90 to-blue-50/80 text-primary border border-white/90 shadow-xs">
+        <Icon aria-hidden="true" className="size-5.5" />
+      </span>
+      <div className="min-w-0">
+        <p className="truncate text-[10.5px] font-extrabold uppercase tracking-[0.1em] text-muted-foreground">{label}</p>
+        <p className="mt-0.5 font-heading text-2xl font-bold tracking-tight tabular-nums text-foreground sm:text-3xl">
+          {value}
+        </p>
+        <p className="truncate text-xs text-muted-foreground">{note}</p>
+      </div>
+    </div>
+  );
+}
+
+function EvidenceButton({
+  icon: Icon,
+  label,
+  count,
+  onClick,
+}: {
+  icon: typeof Camera;
+  label: string;
+  count: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      type="button"
+      className="glass-panel-interactive min-h-[108px] cursor-pointer rounded-2xl border border-white/80 p-3.5 text-left transition-all hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <span className="grid size-9 place-items-center rounded-xl bg-primary/10 text-primary">
+        <Icon aria-hidden="true" className="size-4.5" />
+      </span>
+      <span className="mt-3 block text-sm font-bold text-foreground">{label}</span>
+      <span className="mt-0.5 block text-xs text-muted-foreground font-medium">{count}</span>
     </button>
   );
 }
