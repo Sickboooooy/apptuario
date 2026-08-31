@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type SyntheticEvent } from 'react';
+import Image from 'next/image';
 import {
   ArrowLeft,
   Bell,
@@ -22,7 +23,6 @@ import {
   Plus,
   Route,
   Search,
-  Scale,
   Settings,
   Sparkles,
   Upload,
@@ -87,8 +87,8 @@ export default function Home() {
     <div className="min-h-dvh bg-background text-foreground">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] border-r border-sidebar-border bg-sidebar lg:flex lg:flex-col">
         <div className="flex h-20 items-center gap-3 border-b border-sidebar-border px-6">
-          <div className="grid size-10 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-            <Scale aria-hidden="true" className="size-5" />
+          <div className="grid size-11 place-items-center overflow-hidden rounded-xl bg-white p-0.5 shadow-sm ring-1 ring-sidebar-border">
+            <Image src="/apptuario-mark.png" alt="" width={44} height={44} className="size-full object-contain" priority />
           </div>
           <div>
             <p className="font-heading text-[22px] font-semibold leading-none tracking-tight">AppTuario</p>
@@ -134,8 +134,8 @@ export default function Home() {
       <div className="lg:pl-[248px]">
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-background/95 px-4 backdrop-blur sm:px-6 lg:h-20 lg:px-8">
           <div className="flex items-center gap-3 lg:hidden">
-            <div className="grid size-9 place-items-center rounded-lg bg-primary text-primary-foreground">
-              <Scale aria-hidden="true" className="size-[18px]" />
+            <div className="grid size-10 place-items-center overflow-hidden rounded-lg bg-white p-0.5 shadow-sm ring-1 ring-border">
+              <Image src="/apptuario-mark.png" alt="" width={40} height={40} className="size-full object-contain" priority />
             </div>
             <span className="font-heading text-xl font-semibold">AppTuario</span>
           </div>

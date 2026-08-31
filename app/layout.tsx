@@ -5,6 +5,10 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://apptuario.sickboooooy.chatgpt.site'),
   title: 'AppTuario | Gestión actuarial',
   description: 'Organiza expedientes, rutas, diligencias y razones actuariales en un solo lugar.',
+  icons: {
+    icon: [{ url: '/apptuario-mark.png', type: 'image/png' }],
+    apple: [{ url: '/apptuario-mark.png', type: 'image/png' }],
+  },
   alternates: {
     canonical: 'https://apptuario.sickboooooy.chatgpt.site',
   },
