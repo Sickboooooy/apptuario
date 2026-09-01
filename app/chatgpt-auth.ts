@@ -1,5 +1,7 @@
+import { env } from 'cloudflare:workers';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { timingSafeEqual } from '@/lib/user-auth';
 
 export type ChatGPTUser = {
   userId: string;
@@ -18,8 +20,28 @@ const SIGN_IN_PATH = '/signin-with-chatgpt';
 const SIGN_OUT_PATH = '/signout-with-chatgpt';
 const CALLBACK_PATH = '/callback';
 
+// Header con el secreto compartido que debe acompañar cualquier petición que
+// se presente como "autenticada por ChatGPT". El propio Worker es alcanzable
+// directamente (URL pública de Cloudflare, contenedor Docker, etc.), así que
+// nada garantiza que oai-authenticated-user-* llegue únicamente a través del
+// gateway de OpenAI: cualquiera podría fijarlos a mano con curl y suplantar a
+// cualquier usuario. Sin CHATGPT_CONNECTOR_SECRET configurado, este fallback
+// queda deshabilitado (fail closed) — la app sigue funcionando con login
+// normal por sesión, solo se pierde la identidad "inyectada" por ChatGPT.
+const CONNECTOR_SECRET_HEADER = 'x-apptuario-connector-secret';
+
+function isTrustedConnectorRequest(requestHeaders: Headers): boolean {
+  const expected = env.CHATGPT_CONNECTOR_SECRET;
+  if (!expected) return false;
+  const provided = requestHeaders.get(CONNECTOR_SECRET_HEADER);
+  if (!provided) return false;
+  return timingSafeEqual(provided, expected);
+}
+
 export async function getChatGPTUser(): Promise<ChatGPTUser | null> {
   const requestHeaders = await headers();
+  if (!isTrustedConnectorRequest(requestHeaders)) return null;
+
   const userId = requestHeaders.get(USER_ID_HEADER);
   const email = requestHeaders.get(USER_EMAIL_HEADER);
   if (!userId || !email) return null;

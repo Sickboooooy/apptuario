@@ -159,7 +159,7 @@ async function sha256(value: string) {
   return toBase64Url(new Uint8Array(digest));
 }
 
-function timingSafeEqual(left: string, right: string) {
+export function timingSafeEqual(left: string, right: string) {
   if (left.length !== right.length) return false;
   let difference = 0;
   for (let index = 0; index < left.length; index += 1) {

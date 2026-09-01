@@ -1,3 +1,12 @@
 # Opcional: crea una copia llamada .dev.vars y agrega tu llave.
 # Sin esta llave, AppTuario usa Nominatim y el cálculo local aproximado.
 ORS_API_KEY=
+
+# Opcional: secreto compartido que debe acompañar (header
+# x-apptuario-connector-secret) cualquier petición que se presente como
+# autenticada por ChatGPT (oai-authenticated-user-*). Sin este valor, esos
+# headers NUNCA se confían — el fallback de identidad de ChatGPT queda
+# deshabilitado y solo funciona el login normal por sesión. Genera un valor
+# aleatorio largo (p. ej. `openssl rand -hex 32`) y configúralo también en el
+# componente/proxy que efectivamente controla y firma esas peticiones.
+CHATGPT_CONNECTOR_SECRET=
