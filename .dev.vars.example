@@ -1,0 +1,3 @@
+# Opcional: crea una copia llamada .dev.vars y agrega tu llave.
+# Sin esta llave, AppTuario usa Nominatim y el cálculo local aproximado.
+ORS_API_KEY=

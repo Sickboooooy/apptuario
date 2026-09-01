@@ -1,0 +1,16 @@
+services:
+  apptuario:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: apptuario:local
+    ports:
+      - '${APPTUARIO_PORT:-3001}:3000'
+    volumes:
+      - apptuario_data:/app/.wrangler
+      - '${APPTUARIO_VARS_FILE:-./.dev.vars.example}:/app/dist/server/.dev.vars:ro'
+    init: true
+    restart: unless-stopped
+
+volumes:
+  apptuario_data:

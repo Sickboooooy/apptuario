@@ -1,0 +1,16 @@
+.git
+.gitignore
+.next
+.vinext
+.wrangler
+dist
+node_modules
+outputs
+work
+.env*
+.dev.vars
+*.log
+*.tsbuildinfo
+Dockerfile*
+compose*.yaml
+docs
