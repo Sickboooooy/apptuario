@@ -41,10 +41,24 @@ Qué tan sensible es el dato asociado al destinatario:
   (o un campo equivalente) a `cases` queda pendiente si en el futuro se
   necesita distinguir el nivel de sensibilidad de un caso completo.
 
+- `POST /api/recipients` (Fase 4, `lib/recipient-capture-policy.ts`)
+  rechaza captura de texto libre de un `recipient_kind = natural_person`
+  cuando `REAL_JUDICIAL_DATA` no es `'true'` — ver ADR-005.
+- `POST /api/geocode` (Fase 4) rechaza con 422 cualquier request con
+  `recipientKind: 'natural_person'` antes de llamar a un proveedor
+  externo, y su payload (`lib/geocode-request.ts`) es un tipo cerrado que
+  no puede admitir un campo de nombre ni de expediente — garantizado por
+  el compilador, no por convención.
+
 ## Pendiente para fases posteriores
 
-- Fase 3 (`lib/ai/redactor.ts`) debe negarse a tokenizar o enviar a un
-  modelo cualquier campo cuya `data_classification` sea
-  `judicial_restricted` o `high_risk` sin pasar primero por el tokenizador.
-- Fase 4 debe rechazar geocodificación externa para `recipient_kind =
-  natural_person` (HTTP 422) independientemente de `data_classification`.
+- `lib/ai/redactor.ts` (Fase 3) no distingue hoy por `data_classification`
+  al tokenizar: trata todo campo del diccionario igual. Negarse a incluir
+  en el prompt cualquier campo `judicial_restricted`/`high_risk` sin pasar
+  primero por el tokenizador queda pendiente de una fase futura si se
+  necesita ese nivel de granularidad.
+- El formulario real de captura de destinatarios, la integración con un
+  modelo de IA concreto, el componente de constancia rotulada, y conectar
+  `app/api/recipients` a persistencia cifrada real quedan fuera del
+  alcance implementado en Fase 4 — ver "Alcance implementado" en
+  ADR-005.

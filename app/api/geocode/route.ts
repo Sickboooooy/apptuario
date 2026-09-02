@@ -26,6 +26,20 @@ export async function POST(request: Request) {
   }
 
   const body = await safeJson(request);
+
+  // Invariant: geocoding a natural_person recipient can never be sent to
+  // an external service. Both providers below (OpenRouteService and
+  // Nominatim) are external, so this is checked before either is reached.
+  if (body?.recipientKind === 'natural_person') {
+    return Response.json(
+      {
+        error:
+          'La geocodificación de un destinatario persona física no puede enviarse a un servicio externo.',
+      },
+      { status: 422 },
+    );
+  }
+
   const query =
     typeof body?.query === 'string'
       ? body.query.trim().replace(/\s+/g, ' ')
@@ -175,9 +189,14 @@ function isInGuadalajaraArea([longitude, latitude]: [number, number]) {
   );
 }
 
-async function safeJson(request: Request): Promise<{ query?: unknown } | null> {
+async function safeJson(
+  request: Request,
+): Promise<{ query?: unknown; recipientKind?: unknown } | null> {
   try {
-    return (await request.json()) as { query?: unknown };
+    return (await request.json()) as {
+      query?: unknown;
+      recipientKind?: unknown;
+    };
   } catch {
     return null;
   }
