@@ -7,6 +7,21 @@ import {
   uniqueIndex,
 } from 'drizzle-orm/sqlite-core';
 
+export const recipientKinds = [
+  'public_authority',
+  'public_servant',
+  'private_legal_entity',
+  'natural_person',
+] as const;
+
+export const dataClassifications = [
+  'public',
+  'operational',
+  'personal',
+  'judicial_restricted',
+  'high_risk',
+] as const;
+
 export const users = sqliteTable(
   'users',
   {
@@ -71,7 +86,14 @@ export const cases = sqliteTable(
       .notNull()
       .default('amparo_indirecto'),
     courtName: text('court_name').notNull(),
-    claimant: text('claimant'),
+    // Encrypted party name (the "quejoso"/claimant). See lib/crypto (Fase 2)
+    // for the envelope-encryption helpers that populate these columns; the
+    // group stays nullable because a case may not yet have a named claimant.
+    claimantCiphertext: text('claimant_ciphertext'),
+    claimantIv: text('claimant_iv'),
+    claimantTag: text('claimant_tag'),
+    claimantKeyVersion: integer('claimant_key_version'),
+    claimantBlindIndex: text('claimant_blind_index'),
     status: text('status', { enum: ['active', 'closed', 'archived'] })
       .notNull()
       .default('active'),
@@ -89,6 +111,7 @@ export const cases = sqliteTable(
       table.courtName,
     ),
     index('idx_cases_user_status').on(table.userId, table.status),
+    index('idx_cases_claimant_blind').on(table.claimantBlindIndex),
   ],
 );
 
@@ -137,9 +160,24 @@ export const recipients = sqliteTable(
     caseId: text('case_id')
       .notNull()
       .references(() => cases.id, { onDelete: 'cascade' }),
-    name: text('name').notNull(),
+    recipientKind: text('recipient_kind', { enum: recipientKinds }).notNull(),
+    dataClassification: text('data_classification', {
+      enum: dataClassifications,
+    }).notNull(),
+    // Encrypted recipient name. See lib/crypto (Fase 2) for the
+    // envelope-encryption helpers that populate this column group.
+    nameCiphertext: text('name_ciphertext').notNull(),
+    nameIv: text('name_iv').notNull(),
+    nameTag: text('name_tag').notNull(),
+    nameKeyVersion: integer('name_key_version').notNull(),
+    nameBlindIndex: text('name_blind_index').notNull(),
     role: text('role'),
-    addressLine: text('address_line').notNull(),
+    // Encrypted street address. Same column-group shape as name above.
+    addressLineCiphertext: text('address_line_ciphertext').notNull(),
+    addressLineIv: text('address_line_iv').notNull(),
+    addressLineTag: text('address_line_tag').notNull(),
+    addressLineKeyVersion: integer('address_line_key_version').notNull(),
+    addressLineBlindIndex: text('address_line_blind_index').notNull(),
     municipality: text('municipality'),
     state: text('state').default('Ciudad de México'),
     postalCode: text('postal_code'),
@@ -152,7 +190,11 @@ export const recipients = sqliteTable(
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
   },
-  (table) => [index('idx_recipients_case').on(table.caseId)],
+  (table) => [
+    index('idx_recipients_case').on(table.caseId),
+    index('idx_recipients_name_blind').on(table.nameBlindIndex),
+    index('idx_recipients_address_blind').on(table.addressLineBlindIndex),
+  ],
 );
 
 export const notifications = sqliteTable(
@@ -287,5 +329,82 @@ export const calendarEntries = sqliteTable(
   },
   (table) => [
     index('idx_calendar_user_start').on(table.userId, table.startsAt),
+  ],
+);
+
+// Wrapped per-case data-encryption keys (DEK). The DEK itself never exists
+// in plaintext outside client memory; only its wrapping (by the account KEK)
+// is stored here. Rows are keyed by (case_id, key_version) so a case can
+// carry more than one DEK generation over its lifetime; rotateAccountKey()
+// (Fase 2) re-wraps existing rows without minting a new key_version.
+export const caseKeys = sqliteTable(
+  'case_keys',
+  {
+    caseId: text('case_id')
+      .notNull()
+      .references(() => cases.id, { onDelete: 'cascade' }),
+    wrappedDek: text('wrapped_dek').notNull(),
+    keyVersion: integer('key_version').notNull(),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    uniqueIndex('idx_case_keys_case_version').on(
+      table.caseId,
+      table.keyVersion,
+    ),
+  ],
+);
+
+// Per-case token <-> real-value map used by lib/ai (Fase 3) to keep
+// literal party names/addresses out of any prompt sent to a model. The AI
+// only ever sees the `token` column; `value_*` stays encrypted at rest and
+// is only decrypted client-side during rehydrate().
+export const tokenDictionary = sqliteTable(
+  'token_dictionary',
+  {
+    caseId: text('case_id')
+      .notNull()
+      .references(() => cases.id, { onDelete: 'cascade' }),
+    token: text('token').notNull(),
+    valueCiphertext: text('value_ciphertext').notNull(),
+    valueIv: text('value_iv').notNull(),
+    valueTag: text('value_tag').notNull(),
+    keyVersion: integer('key_version').notNull(),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    uniqueIndex('idx_token_dictionary_case_token').on(
+      table.caseId,
+      table.token,
+    ),
+  ],
+);
+
+// Append-only evidentiary bitácora. Each row hash-chains to the previous
+// event via prev_event_hash; the data-access layer (db/evidence-events.ts)
+// exposes only an insert, and idx_evidence_events_no_update/delete below
+// reject UPDATE/DELETE at the database level as a second, independent
+// enforcement layer.
+export const evidenceEvents = sqliteTable(
+  'evidence_events',
+  {
+    id: text('id').primaryKey(),
+    caseId: text('case_id')
+      .notNull()
+      .references(() => cases.id, { onDelete: 'cascade' }),
+    eventType: text('event_type').notNull(),
+    payloadHash: text('payload_hash').notNull(),
+    prevEventHash: text('prev_event_hash'),
+    actorUserId: text('actor_user_id').notNull(),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index('idx_evidence_events_case').on(table.caseId, table.createdAt),
   ],
 );
